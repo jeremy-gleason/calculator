@@ -6,15 +6,17 @@ const buttons = document.querySelectorAll('button');
 const display = document.querySelector('#display');
 
 buttons.forEach(button => {
-  button.addEventListener('click', handleInput);
+  button.addEventListener('click', e => handleInput(e.target.value));
 });
 
-function handleInput(e) {
-  if (!isNaN(e.target.value)) {
-    displayStr = displayStr === '0' ? e.target.value : displayStr + e.target.value;
+document.addEventListener('keydown', e => handleInput(e.key));
+
+function handleInput(input) {
+  if (!isNaN(input)) {
+    displayStr = displayStr === '0' ? input : displayStr + input;
     display.textContent = displayStr;
   } else {
-    switch(e.target.value) {
+    switch(input) {
       case 'clear':
         displayStr = '0';
         lastOperator = '';
@@ -49,7 +51,7 @@ function handleInput(e) {
         } else {
           runningTotal = displayNum;
         }
-        lastOperator = e.target.value;
+        lastOperator = input;
         displayStr = '0';
         display.textContent = runningTotal;
         break;
