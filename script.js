@@ -1,6 +1,7 @@
-let runningTotal = 0;
-let displayStr = '0';
-let lastOperator = '';
+let runningTotal = null;
+let enteredStr = '';
+let enteredNum = null;
+let operator = '';
 
 const buttons = document.querySelectorAll('button');
 const display = document.querySelector('#display');
@@ -13,47 +14,92 @@ document.addEventListener('keydown', e => handleInput(e.key));
 
 function handleInput(input) {
   if (!isNaN(input)) {
-    displayStr = displayStr === '0' ? input : displayStr + input;
-    display.textContent = displayStr;
+    if (!enteredStr || enteredStr === '0') {
+      enteredStr = input;
+    } else {
+      enteredStr += input;
+    }
+    display.textContent = enteredStr;
   } else {
     switch(input) {
       case 'clear':
-        displayStr = '0';
-        lastOperator = '';
-        display.textContent = displayStr;
+        enteredStr = '';
+        operator = '';
+        runningTotal = null;
+        display.textContent = '0';
         break;
       case 'sign':
-        if (displayStr[0] === '-') {
-          displayStr = displayStr.slice(1);
-        } else {
-          displayStr = '-' + displayStr;
+        if (enteredStr) {
+          if (enteredStr[0] === '-') {
+            enteredStr = enteredStr.slice(1);
+          } else {
+            enteredStr = '-' + enteredStr;
+          }
+          display.textContent = enteredStr;
+        } else if (runningTotal !== null) {
+          runningTotal *= -1;
+          display.textContent = runningTotal;
         }
-        display.textContent = displayStr;
+        break;
+      case '%':
+        if (enteredStr) {
+          if (enteredStr.includes('.')) {
+            enteredNum = parseFloat(enteredStr);
+          } else {
+            enteredNum = parseInt(enteredStr);
+          }
+          enteredStr = '';
+        }
+        if (enteredNum !== null) {
+          enteredNum /= 100;
+          display.textContent = enteredNum;
+        } else if (runningTotal !== null) {
+          runningTotal /= 100;
+          display.textContent = runningTotal;
+        }
         break;
       case '.':
-        if (!displayStr.includes('.')) {
-          displayStr += '.';
-          display.textContent = displayStr;
+        if (!enteredStr) {
+          enteredStr = '0.';
+        } else if (!enteredStr.includes('.')) {
+          enteredStr += '.';
         }
+        display.textContent = enteredStr;
         break;
       case '+':
       case '-':
       case '*':
       case '/':
-        let displayNum;
-        if (displayStr.includes('.')) {
-          displayNum = parseFloat(displayStr);
-        } else {
-          displayNum = parseInt(displayStr);
+      case '=':
+        if (enteredNum !== null || enteredStr) {
+          if (enteredStr) {
+            if (enteredStr.includes('.')) {
+              enteredNum = parseFloat(enteredStr);
+            } else {
+              enteredNum = parseInt(enteredStr);
+            }
+          }
+          if (runningTotal === null || !operator) {
+            runningTotal = enteredNum;
+            display.textContent = enteredStr;
+          } else {
+            runningTotal = evaluate(operator, runningTotal, enteredNum);
+            display.textContent = runningTotal;
+          }
+          if (input === '=') {
+            operator = '';
+          } else {
+            operator = input;
+          }
+          enteredStr = '';
+          enteredNum = null;
+        } else if (runningTotal !== null) {
+          if (input === '=') {
+            operator = '';
+          } else {
+            operator = input;
+          }
         }
-        if (lastOperator) {
-          runningTotal = operate(lastOperator, runningTotal, displayNum);
-        } else {
-          runningTotal = displayNum;
-        }
-        lastOperator = input;
-        displayStr = '0';
-        display.textContent = runningTotal;
         break;
     }
   }
@@ -75,7 +121,7 @@ function divide (a, b) {
   return a / b;
 }
 
-function operate(operator, a, b) {
+function evaluate(operator, a, b) {
   switch (operator) {
     case '+':
       return add(a, b);
