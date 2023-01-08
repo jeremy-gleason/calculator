@@ -18,6 +18,11 @@ function handleInput(input) {
       enteredStr = input;
     } else {
       enteredStr += input;
+      if (enteredStr.includes('.')) {
+        enteredStr = parseFloat(enteredStr.replaceAll(',','')).toLocaleString("en-US");
+      } else {
+        enteredStr = parseInt(enteredStr.replaceAll(',','')).toLocaleString("en-US");
+      }
     }
     display.textContent = enteredStr;
   } else {
@@ -36,26 +41,29 @@ function handleInput(input) {
             enteredStr = '-' + enteredStr;
           }
           display.textContent = enteredStr;
+        } else if (enteredNum !== null) {
+          enteredNum *= -1;
+          display.textContent = enteredNum.toLocaleString("en-US");
         } else if (runningTotal !== null) {
           runningTotal *= -1;
-          display.textContent = runningTotal;
+          display.textContent = runningTotal.toLocaleString("en-US");
         }
         break;
       case '%':
         if (enteredStr) {
           if (enteredStr.includes('.')) {
-            enteredNum = parseFloat(enteredStr);
+            enteredNum = parseFloat(enteredStr.replaceAll(',',''));
           } else {
-            enteredNum = parseInt(enteredStr);
+            enteredNum = parseInt(enteredStr.replaceAll(',',''));
           }
           enteredStr = '';
         }
         if (enteredNum !== null) {
           enteredNum /= 100;
-          display.textContent = enteredNum;
+          display.textContent = enteredNum.toLocaleString("en-US");
         } else if (runningTotal !== null) {
           runningTotal /= 100;
-          display.textContent = runningTotal;
+          display.textContent = runningTotal.toLocaleString("en-US");
         }
         break;
       case '.':
@@ -74,23 +82,22 @@ function handleInput(input) {
         if (enteredNum !== null || enteredStr) {
           if (enteredStr) {
             if (enteredStr.includes('.')) {
-              enteredNum = parseFloat(enteredStr);
+              enteredNum = parseFloat(enteredStr.replaceAll(',',''));
             } else {
-              enteredNum = parseInt(enteredStr);
+              enteredNum = parseInt(enteredStr.replaceAll(',',''));
             }
           }
           if (runningTotal === null || !operator) {
             runningTotal = enteredNum;
-            display.textContent = enteredStr;
           } else {
             runningTotal = evaluate(operator, runningTotal, enteredNum);
-            display.textContent = runningTotal;
           }
           if (input === '=') {
             operator = '';
           } else {
             operator = input;
           }
+          display.textContent = runningTotal.toLocaleString("en-US");
           enteredStr = '';
           enteredNum = null;
         } else if (runningTotal !== null) {
